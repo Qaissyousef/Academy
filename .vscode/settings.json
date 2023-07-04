@@ -1,0 +1,6 @@
+{
+    "[dart]": {
+        "editor.defaultFormatter": "josetr.cmake-language-support-vscode"
+    },
+    "editor.defaultFormatter": "myass"
+}

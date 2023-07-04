@@ -1,0 +1,602 @@
+import 'dart:convert';
+import 'package:date_time_format/date_time_format.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
+import 'package:pif_admin_dashboard/mobile/courseDetails/courseNav.dart';
+import 'package:pif_admin_dashboard/mobile/sideBar.dart';
+import 'package:web_smooth_scroll/web_smooth_scroll.dart';
+import 'package:http/http.dart' as http;
+import '../models/admissionModel.dart';
+import '../models/course_model.dart';
+import 'applicantDetail.dart';
+import 'package:pif_admin_dashboard/util/global.dart' as global;
+class mobileAdmissionPage extends StatefulWidget {
+  final Course course;
+
+  const mobileAdmissionPage({Key? key,required this.course}) : super(key: key);
+
+  @override
+  State<mobileAdmissionPage> createState() => _mobileAdmissionPageState();
+}
+
+class _mobileAdmissionPageState extends State<mobileAdmissionPage> {
+  late ScrollController _scrollController;
+
+  Future<List<admissionModel>> fetchAdmissionInfo() async {
+    final response =
+    await http.get(Uri.parse(global.apiAddress + 'GetAllApllicants/${widget.course.course_id}'));
+
+    if (response.statusCode == 200) {
+      final parsed = json.decode(response.body).cast<Map<String, dynamic>>();
+
+      return parsed.map<admissionModel>((json) => admissionModel.fromMap(json)).toList();
+    } else {
+      throw Exception('Failed to load album');
+    }
+  }
+  late Future<List<admissionModel>> futurefetchAdmissionInfo;
+
+  @override
+  void initState() {
+    futurefetchAdmissionInfo = fetchAdmissionInfo();
+
+
+    _scrollController = ScrollController();
+
+    super.initState();
+  }
+  @override
+  Widget build(BuildContext context) {
+    double height = MediaQuery.of(context).size.height;
+    double width = MediaQuery.of(context).size.width;
+
+
+
+    final num = SizedBox(
+        child: ElevatedButton(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text("08".tr().toString(),strutStyle: StrutStyle(
+                  forceStrutHeight: true
+              )),
+              SizedBox(width: 70,),
+              Icon(Icons.expand_more_rounded,size: 16,color: Color(0xFF999999),)
+            ],
+          ),
+          onPressed: (){
+            print("You pressed Icon Elevated Button");
+          },
+          // icon: Icon(Icons.filter_list),
+          //  //label text
+          style: ElevatedButton.styleFrom(
+              elevation: 0,
+              side: BorderSide(width: 1.5, color: Color(0xFFEEEEEE)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10), // <-- Radius
+              ),
+              primary: Colors.white ,//elevated btton background color
+              onPrimary: Colors.black,
+              minimumSize: Size(135,50)
+          ),
+        ));
+    final sort =
+    SizedBox(
+        height: height*0.058,
+        width: width*0.44,
+        child: ElevatedButton.icon(
+          onPressed: (){
+            showMaterialModalBottomSheet(
+              useRootNavigator: true,
+
+              context: context,
+              builder: (context) => Container(
+                height: MediaQuery.of(context).size.height * 0.4,
+
+                child: Container(
+
+                  height: 600,
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.vertical,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            IconButton(
+                              icon:  Icon(Icons.arrow_back_ios_new,size: 18),
+                              onPressed: () {  Navigator.of(context).pop(); },
+                            ),
+
+                            Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [Text("Sort".tr(),style: GoogleFonts.barlow(
+                                textStyle :TextStyle(fontFamily: 'Barlow',fontSize: 16,fontWeight: FontWeight.w500,fontStyle: FontStyle.normal,color: Color(0xff222222) ),)),
+
+                              ],
+                            ),
+                            SizedBox(width: 1,)
+
+                          ],
+                        ),
+                        SizedBox(height: height*0.05,),
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            SizedBox(
+                              width: width*0.9,
+                              height: height*0.07,
+
+                              child: ElevatedButton(
+                                onPressed: () {
+                                  setState(() {
+
+                                    //
+                                    // isVisible = !isVisible;
+                                    // isVisibleButton = !isVisibleButton;
+
+                                  });
+                                  Navigator.pop(context);
+                                },
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text('Newest to Oldest'.tr().toString(),strutStyle: StrutStyle(
+                                        forceStrutHeight: true
+                                    ),style: GoogleFonts.barlow(textStyle:TextStyle(fontFamily: 'Barlow',fontSize: 14,fontWeight: FontWeight.w500,fontStyle: FontStyle.normal,color:Color(0xFF222222) ),),),
+                                    SizedBox(width: 5,),SvgPicture.asset('assets/images/tick.svg',), SizedBox(width: 5),],),
+                                style: ElevatedButton.styleFrom(
+                                    elevation: 0,
+                                    primary: Colors.white,
+                                    onPrimary: Colors.black,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    side: BorderSide(
+                                        width: 1,
+                                        color: Color(0xff999999)
+                                    )
+                                ),
+                              ),
+                            ),
+                            SizedBox(height: height*0.02,),
+                            SizedBox(
+                              width: width*0.9,
+                              height: height*0.07,
+
+                              child: ElevatedButton(
+                                onPressed: () {
+
+                                },
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+
+                                    Text('Oldest to Newest'.tr().toString(),strutStyle: StrutStyle(
+                                        forceStrutHeight: true
+                                    ),style: GoogleFonts.barlow(textStyle:TextStyle(fontFamily: 'Barlow',fontSize: 14,fontWeight: FontWeight.w500,fontStyle: FontStyle.normal,color:Color(0xFF222222) ),),)],),
+                                style: ElevatedButton.styleFrom(
+                                    elevation: 0,
+                                    primary: Colors.white,
+                                    onPrimary: Colors.black,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    side: BorderSide(
+                                        width: 1,
+                                        color: Color(0xff999999)
+                                    )
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
+          icon: Icon(Icons.filter_list),  //icon data for elevated button
+          label: Text("Sort".tr().toString(),strutStyle: StrutStyle(
+              forceStrutHeight: true
+          )), //label text
+          style: ElevatedButton.styleFrom(
+              elevation: 0,
+              side: BorderSide(width: 1.5, color: Color(0xFFEEEEEE)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(7), // <-- Radius
+              ),
+              primary: Colors.white ,//elevated btton background color
+              onPrimary: Colors.black,
+              minimumSize: Size(width*0.45,50)
+          ),
+        ));
+
+    final search = SizedBox(
+      height: height*0.055,
+      width: width*0.92,
+      child: Container(
+        // margin: const EdgeInsets.all(1.0),
+        // padding: const EdgeInsets.all(1.0),
+        decoration: BoxDecoration(
+            color: Colors.white,
+
+            border: Border.all(color: Color(0xFFEEEEEE)),
+            borderRadius: BorderRadius.circular(10.0)
+        ),
+        child: TextField(
+          decoration: InputDecoration(
+            prefixIcon:  SvgPicture.asset("images/search.svg",fit: BoxFit.scaleDown,),
+            border: InputBorder.none,
+
+            hintText: 'Search'.tr().toString(),
+            contentPadding: EdgeInsets.only(top:10),
+            hintStyle:  GoogleFonts.barlow(textStyle: TextStyle(fontSize: 14,fontWeight: FontWeight.w400,fontStyle: FontStyle.normal,color:Color(0xFF999999) ) ),
+            
+            // enabledBorder: const OutlineInputBorder(
+            //   // borderSide: const BorderSide(color: Color(0xFFEEEEEE),),
+            // ),
+
+
+
+          ),
+
+
+
+        ),
+      ),
+    );
+
+    final filter = SizedBox(height: height*0.058,
+        width: width*0.44,
+        child : ElevatedButton.icon(
+          onPressed: ()async {
+
+            DateTimeRange? picked = await showDateRangePicker(
+                context: context,
+                firstDate: DateTime(DateTime.now().year - 5),
+                lastDate: DateTime(DateTime.now().year + 5),
+
+                builder: (context, child) {
+                  return Theme(
+                    data: ThemeData(
+                      //Header background color
+                      primaryColor: Color(0xff007A33),
+                      //Background color
+                      scaffoldBackgroundColor: Colors.white,
+                      //Divider color
+                      dividerColor: Colors.grey,
+                      //Non selected days of the month color
+                      textTheme: TextTheme(
+                        bodyText2:
+                        TextStyle(color: Colors.black),
+                      ),colorScheme: ColorScheme.fromSwatch().copyWith(
+                      //Selected dates background color
+                      primary: Color(0xff215732),
+                      //Month title and week days color
+                      onSurface: Colors.black,
+                      //Header elements and selected dates text color
+                      //onPrimary: Colors.white,
+                    ),),
+
+                    child: Column(
+                      children: [
+                        ConstrainedBox(
+                          constraints: BoxConstraints(
+                            maxWidth: 400.0,
+                            maxHeight: height*0.7,
+                          ),
+                          child: child,
+                        )
+                      ],
+                    ),
+                  );
+                });
+            print(picked);
+
+          },
+          icon: ImageIcon(
+            AssetImage("assets/mobileImages/funnel.png"),
+            size: 24,
+          ),  //icon data for elevated button
+          label: Text("Filter".tr().toString(),strutStyle: StrutStyle(
+              forceStrutHeight: true
+          )), //label text
+          style: ElevatedButton.styleFrom(
+            elevation: 0,
+            side: BorderSide(width: 1.5, color: Color(0xFFEEEEEE)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(7), // <-- Radius
+            ),
+            primary: Colors.white ,//elevated btton background color
+            onPrimary: Colors.black,
+
+
+          ),
+        )
+    );
+
+
+
+
+
+
+    return Scaffold(
+      drawer: SideNavBar(),
+      appBar: AppBar(
+          toolbarHeight: height*0.15,
+          automaticallyImplyLeading: false,
+          title: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Container(
+
+                      child: GestureDetector( onTap: () {Navigator.of(context).pop();}, child: Icon(Icons.arrow_back_ios,size: 15) )),
+
+                  Builder(
+                    builder: (context) => IconButton(
+                      icon: new Icon(Icons.menu),
+                      onPressed: () => Scaffold.of(context).openDrawer(),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: height*0.02),
+
+
+              Text("${widget.course.course_name}".tr().toString(),style: GoogleFonts.barlow(textStyle:  TextStyle(fontFamily: 'Barlow',fontSize: 22,fontWeight: FontWeight.w500,fontStyle: FontStyle.normal,color:Color(0xFFFBFCFC) ),),
+              ),
+              SizedBox(height: 10),],
+          ),
+          // actions: <Widget>[
+          //
+          // ],
+          flexibleSpace: Container(
+
+            decoration: BoxDecoration(
+                image: DecorationImage(
+                  // image: AssetImage(context.locale == Locale("en") ? 'assets/images/bgsmall.png' : 'assets/images/topNavArabic.png'),
+                  image: AssetImage('assets/mobileImages/navbg.png'),
+                  fit: BoxFit.fill,
+
+                )
+
+            ),
+
+          )
+      ),
+      body:  Container(
+        height: height,
+        width: width,
+        child: WebSmoothScroll(
+          controller: _scrollController,
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.only(left: 20.0,right: 20.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+
+
+
+
+                  SizedBox(height: height*0.02,),
+
+                  search,
+                  SizedBox(height: height*0.02,),
+
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                    filter,sort
+                  ],),
+                  SizedBox(height: height*0.02,),
+                  //
+                  // Row(
+                  //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  //   children: [
+                  //   num,
+                  //   Text("Showing 6 of 6 results".tr(),style: GoogleFonts.barlow(
+                  //     textStyle: TextStyle(color: Color(0xFF999999), fontWeight: FontWeight.w500,fontStyle: FontStyle.normal,fontSize: 14),
+                  //   ),),
+                  // ],),
+                  // SizedBox(height: height*0.02,),
+
+                  SizedBox(
+                    height: height*0.055,
+                    width: width*0.92,
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 5.0),
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => courseNav(course: widget.course,)),
+                          );
+                        },
+                        child: Text("  Course information  ".tr().toString(),strutStyle: StrutStyle(
+                            forceStrutHeight: true
+                        ), style: GoogleFonts.barlow(textStyle:  TextStyle(fontFamily: 'Barlow',fontSize: 16,fontWeight: FontWeight.w500,fontStyle: FontStyle.normal,color:Color(0xFFFBFCFC) ),
+                        ),),
+                        style: ElevatedButton.styleFrom(
+                            primary: Color(0xFF215732),
+                            onPrimary: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+
+                            side: BorderSide(
+                                width: 0.4,
+                                color: Color(0xFF215732)
+                            )
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: height*0.02),
+                  FutureBuilder<List<admissionModel>>(
+
+                    future: futurefetchAdmissionInfo ,
+                    builder: (context, snapshot) {
+                      if (snapshot.hasData) {
+                        return ListView.builder(
+                          physics: NeverScrollableScrollPhysics(),
+                          shrinkWrap:true,
+                          itemCount: snapshot.data!.length,
+                          itemBuilder: (_, index) => Container(
+
+                              child:
+
+                              Column(
+                                children :[
+                                  Card(
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8.0),
+                                    ),
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(15.0),
+                                      child: Column(
+                                        mainAxisAlignment: MainAxisAlignment.start,
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Row(
+                                            children: [
+                                              // Image.asset("images/smallpfp.png"),
+                                              // SizedBox(width: 15,),
+                                              Text("${snapshot.data![index].name} ".tr().toString(),strutStyle: StrutStyle(
+                                                  forceStrutHeight: true
+                                              ),style:  GoogleFonts.barlow(textStyle: TextStyle(fontFamily: 'Barlow',fontSize: 16,fontWeight: FontWeight.w500,fontStyle: FontStyle.normal,color:Color(0xFFBD9B60) ),),
+                                              )
+                                            ],
+                                          ),
+                                          SizedBox(height: 10,),
+                                          Container(
+                                            height: 25,
+                                            color: Color(0xffffffff),
+                                            child: Row(
+                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+
+                                              children: [
+                                                Container(
+
+                                                  child: Text("Submission date".tr().toString(),strutStyle: StrutStyle(
+                                                      forceStrutHeight: true
+                                                  ),style:  GoogleFonts.barlow(textStyle: TextStyle(fontFamily: 'Barlow',fontSize: 14,fontWeight: FontWeight.w400,fontStyle: FontStyle.normal,color:Color(0xFF999999) ),),
+                                                  ),
+                                                ),
+                                                Container(
+                                                  child: Text(DateTimeFormat.format(DateTime.parse(snapshot.data![index].submissionTime), format: 'D, M j').tr().toString(),strutStyle: StrutStyle(
+                                                      forceStrutHeight: true
+                                                  ),style:  GoogleFonts.barlow(textStyle: TextStyle(fontFamily: 'Barlow',fontSize: 14,fontWeight: FontWeight.w500,fontStyle: FontStyle.normal,color:Color(0xFF222222) ),),
+                                                  ),
+                                                )
+                                              ],
+                                            ),
+                                          ),
+                                          SizedBox(height: 10,),
+
+                                          SizedBox(
+                                            height: height*0.055,
+                                            width: width*0.88,
+                                            child: Padding(
+                                              padding: const EdgeInsets.only(left: 5.0),
+                                              child: ElevatedButton(
+                                                onPressed: () {
+                                                  Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(builder: (context) => mobileApplicantDetail(courseid: widget.course.course_id, userid: 1, cname : widget.course.course_name,usertype: 'participant')),
+                                                  );
+                                                },
+                                                child: Text("View application".tr().toString(),strutStyle: StrutStyle(
+                                                    forceStrutHeight: true
+                                                ), style: GoogleFonts.barlow(textStyle:  TextStyle(fontFamily: 'Barlow',fontSize: 16,fontWeight: FontWeight.w500,fontStyle: FontStyle.normal,color:Colors.black ),
+                                                ),),
+                                                style: ElevatedButton.styleFrom(
+                                                    primary: Colors.white,
+                                                    onPrimary: Colors.black,
+                                                    shape: RoundedRectangleBorder(
+                                                      borderRadius: BorderRadius.circular(8),
+                                                    ),
+
+                                                    side: BorderSide(
+                                                        width: 0.4,
+                                                        color:Colors.black
+                                                    )
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                          SizedBox(height: 10,),
+
+                                          Container(
+
+                                            height: 35,
+                                            child: Row(
+                                              children: [
+                                                Container(
+                                                  width: width*0.69,
+                                                  child: Text("Status".tr().toString(),strutStyle: StrutStyle(
+                                                      forceStrutHeight: true
+                                                  ),style:  GoogleFonts.barlow(textStyle: TextStyle(fontFamily: 'Barlow',fontSize: 14,fontWeight: FontWeight.w400,fontStyle: FontStyle.normal,color:Color(0xFF999999) ),),
+                                                  ),
+                                                ),
+
+                                              ],
+                                            ),
+                                          ),
+
+                                          SizedBox(height: 10,),
+                                          Container(
+                                            child: Text("${snapshot.data![index].status}".tr().toString(),strutStyle: StrutStyle(
+                                                forceStrutHeight: true
+                                            ),style:  GoogleFonts.barlow(textStyle: TextStyle(fontFamily: 'Barlow',fontSize: 14,fontWeight: FontWeight.w500,fontStyle: FontStyle.normal,color:Color(0xFF222222) ),),
+                                            ),
+                                          )
+
+
+
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(width: width*0.015,),
+
+                                ],
+                              )
+                          ),
+                        );
+                      } else {
+                        return Center(child: CircularProgressIndicator());
+                      }
+                    },
+                  ),
+
+
+
+
+
+
+                ],
+              ),
+            ),
+          ),
+        ),),
+    );
+  }
+}
